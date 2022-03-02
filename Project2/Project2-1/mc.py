@@ -129,7 +129,7 @@ def epsilon_greedy(Q, state, nA, epsilon=0.1):
     return np.random.choice(np.arange(len(Q[state])), p=probability)
 
 
-def mc_control_epsilon_greedy(env, n_episodes, gamma = 1.0, epsilon = 0.1):
+def mc_control_epsilon_greedy(env, n_episodes, gamma=1.0, epsilon=0.1):
     """Monte Carlo control with exploring starts.
         Find an optimal epsilon-greedy policy.
 
@@ -156,44 +156,43 @@ def mc_control_epsilon_greedy(env, n_episodes, gamma = 1.0, epsilon = 0.1):
 
     returns_sum = defaultdict(float)
     returns_count = defaultdict(float)
+
     # a nested dictionary that maps state -> (action -> action-value)
-    # e.g. Q[state] = np.darrary(nA)
-    Q = defaultdict(lambda: np.zeros(env.action_space.n))
+    # e.g. Q[state] = np.array(nA)
+    action_count = env.action_space.n
+    Q = defaultdict(lambda: np.zeros(action_count))
 
-    ############################
-    # YOUR IMPLEMENTATION HERE #
+    while epsilon > 0:
+        for i in range(n_episodes):
+            current_state = env.reset()  # initialize the episode
+            episode = []
+            while True:
+                action = epsilon_greedy(Q, current_state, action_count, epsilon)  # select an action
+                new_state, reward, done, info = env.step(action)  # return a reward, new state
+                episode.append((current_state, action, reward))  # append state, action, reward to episode
+                if done:
+                    break
+                current_state = new_state  # update state to new state
 
-        # define decaying epsilon
+            state_action_returns = []  # G for each state
+            G = 0
+            for (state, action, reward) in reversed(episode):
+                G = gamma * G + reward
+                state_action_returns.append(G)
+            state_action_returns.reverse()  # Chronological order of episode
 
+            # Compute MC value function for all (state, action) pairs
+            # Do not update value function if same (state, action) encountered again in current episode
+            visited = []
+            for index, (state, action, r) in enumerate(episode):
+                if (state, action) in visited:
+                    continue
+                visited.append((state, action))
 
+                returns_sum[(state, action)] += state_action_returns[index]
+                returns_count[(state, action)] += 1
+                Q[state][action] = returns_sum[(state, action)]/returns_count[(state, action)]
 
-        # initialize the episode
-
-        # generate empty episode list
-
-        # loop until one episode generation is done
-
-
-            # get an action from epsilon greedy policy
-
-            # return a reward and new state
-
-            # append state, action, reward to episode
-
-            # update state to new state
-
-
-
-        # loop for each step of episode, t = T-1, T-2, ...,0
-
-            # compute G
-
-            # unless the pair state_t, action_t appears in <state action> pair list
-
-                # update return_count
-
-                # update return_sum
-
-                # calculate average return for this state over all sampled episodes
+            epsilon = epsilon - 0.1 / n_episodes
 
     return Q
