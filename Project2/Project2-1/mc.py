@@ -1,23 +1,23 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-import numpy as np
-import random
 from collections import defaultdict
-#-------------------------------------------------------------------------
-'''
+import random
+import numpy as np
+
+"""
     Monte-Carlo
-    In this problem, you will implememnt an AI player for Blackjack.
-    The main goal of this problem is to get familar with Monte-Carlo algorithm.
+    In this problem, you will implement an AI player for Blackjack.
+    The main goal of this problem is to get familiar with Monte-Carlo algorithm.
     You could test the correctness of your code
     by typing 'nosetests -v mc_test.py' in the terminal.
 
     You don't have to follow the comments to write your code. They are provided
     as hints in case you need.
-'''
-#-------------------------------------------------------------------------
+"""
+
 
 def initial_policy(observation):
-    """A policy that sticks if the player score is >= 20 and his otherwise
+    """A policy that sticks if the player score is >= 20 and hits otherwise
 
     Parameters:
     -----------
@@ -29,23 +29,21 @@ def initial_policy(observation):
         0: STICK
         1: HIT
     """
-    ############################
-    # YOUR IMPLEMENTATION HERE #
+
     # get parameters from observation
     score, dealer_score, usable_ace = observation
-    # action
 
-    ############################
-    return action
+    return 0 if score >= 20 else 1
 
-def mc_prediction(policy, env, n_episodes, gamma = 1.0):
+
+def mc_prediction(policy, env, n_episodes, gamma=1.0):
     """Given policy using sampling to calculate the value function
         by using Monte Carlo first visit algorithm.
 
     Parameters:
     -----------
     policy: function
-        A function that maps an obversation to action probabilities
+        A function that maps an observation to action probabilities
     env: function
         OpenAI gym environment
     n_episodes: int
@@ -57,61 +55,55 @@ def mc_prediction(policy, env, n_episodes, gamma = 1.0):
     V: defaultdict(float)
         A dictionary that maps from state to value
 
-    Note: at the begining of each episode, you need initialize the environment using env.reset()
+    Note: at the beginning of each episode, you need to initialize the environment using env.reset()
     """
     # initialize empty dictionaries
     returns_sum = defaultdict(float)
     returns_count = defaultdict(float)
+
     # a nested dictionary that maps state -> value
     V = defaultdict(float)
 
-    ############################
-    # YOUR IMPLEMENTATION HERE #
-    # loop each episode
+    for k in range(n_episodes):
+        current_state = env.reset()  # initialize the episode
+        episode = []
+        while True:
+            action = policy(current_state)  # select an action
+            new_state, reward, done, info = env.step(action)  # return a reward, new state
+            episode.append((current_state, action, reward))  # append state, action, reward to episode
+            if done:
+                break
+            current_state = new_state  # update state to new state
 
-        # initialize the episode
+        state_returns = []  # G for each state
+        G = 0
+        for (state, action, reward) in reversed(episode):
+            G = gamma*G + reward
+            state_returns.append(G)
+        state_returns.reverse()  # Chronological order of episode
 
-        # generate empty episode list
+        # Compute MC value function for all states
+        # Do not update value function if same state encountered again in current episode
+        visited = []
+        for index, (state, a, r) in enumerate(episode):
+            if state in visited:
+                continue
+            visited.append(state)
 
-        # loop until episode generation is done
-
-
-            # select an action
-
-            # return a reward and new state
-
-            # append state, action, reward to episode
-
-            # update state to new state
-
-
-
-
-        # loop for each step of episode, t = T-1, T-2,...,0
-
-            # compute G
-
-            # unless state_t appears in states
-
-                # update return_count
-
-                # update return_sum
-
-                # calculate average return for this state over all sampled episodes
-
-
-
-    ############################
+            returns_sum[state] += state_returns[index]
+            returns_count[state] += 1
+            V[state] = returns_sum[state]/returns_count[state]
 
     return V
 
-def epsilon_greedy(Q, state, nA, epsilon = 0.1):
+
+def epsilon_greedy(Q, state, nA, epsilon=0.1):
     """Selects epsilon-greedy action for supplied state.
 
     Parameters:
     -----------
     Q: dict()
-        A dictionary  that maps from state -> action-values,
+        A dictionary that maps from state -> action-values,
         where Q[s][a] is the estimated action value corresponding to state s and action a.
     state: int
         current state
@@ -129,14 +121,13 @@ def epsilon_greedy(Q, state, nA, epsilon = 0.1):
     With probability (1 − epsilon) choose the greedy action.
     With probability epsilon choose an action at random.
     """
-    ############################
-    # YOUR IMPLEMENTATION HERE #
 
+    greedy_index = np.argmax(Q[state])
+    probability = np.ones(nA)*epsilon/nA  # exploration
+    probability[greedy_index] += 1 - epsilon  # exploitation
 
+    return np.random.choice(np.arange(len(Q[state])), p=probability)
 
-
-    ############################
-    return action
 
 def mc_control_epsilon_greedy(env, n_episodes, gamma = 1.0, epsilon = 0.1):
     """Monte Carlo control with exploring starts.
