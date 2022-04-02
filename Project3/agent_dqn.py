@@ -60,7 +60,7 @@ class ReplayBuffer(object):
         return len(self.buffer)
 
 
-class AgentDQN(Agent):
+class Agent_DQN(Agent):
     """
     Initialize everything you need here.
     For example:
@@ -71,7 +71,7 @@ class AgentDQN(Agent):
         ...
     """
     def __init__(self, env: Environment, args):
-        super(AgentDQN, self).__init__(env)
+        super(Agent_DQN, self).__init__(env)
         self.env = env
         self.action_count = self.env.action_space.n
         in_channels = 4  # (R, G, B, Alpha)
