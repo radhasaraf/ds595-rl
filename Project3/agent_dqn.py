@@ -78,7 +78,7 @@ class Agent_DQN(Agent):
 
         self.Q_net = DQN(in_channels, self.action_count, BATCH_SIZE).to(device)
         self.target_Q_net = DQN(in_channels, self.action_count, 1).to(device)
-        self.target_Q_net.load_state_dict(self.Q_net.state_dict)
+        self.target_Q_net.load_state_dict(self.Q_net.state_dict())
         self.optimizer = optim.Adam(self.Q_net.parameters(), lr=LEARNING_RATE)
 
         self.buffer = ReplayBuffer(BUFFER_SIZE)
