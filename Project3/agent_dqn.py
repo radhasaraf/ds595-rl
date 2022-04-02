@@ -141,8 +141,7 @@ class Agent_DQN(Agent):
                 next_state_t = self.format_state(next_state)
                 reward_t = torch.tensor([reward], device=device)
 
-                transition = (curr_state_t, action, reward_t, next_state_t)
-                self.buffer.push(transition)
+                self.buffer.push(curr_state_t, action, reward_t, next_state_t)
 
                 curr_state = next_state
                 episode_reward += reward
