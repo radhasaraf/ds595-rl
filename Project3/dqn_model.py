@@ -10,10 +10,9 @@ class DQN(nn.Module):
     Architecture reference: Original paper for DQN
     (https://storage.googleapis.com/deepmind-data/assets/papers/DeepMindNature14236Paper.pdf)
     """
-    def __init__(self, in_channels=4, num_actions=4, batch_size=32):
+    def __init__(self, in_channels=4, num_actions=4):
         super(DQN, self).__init__()
         self.num_actions = num_actions
-        self.batch_size = batch_size
         self.conv_relu_stack = nn.Sequential(
             nn.Conv2d(in_channels, 32, kernel_size=8, stride=4),
             nn.ReLU(),
@@ -23,22 +22,30 @@ class DQN(nn.Module):
             nn.ReLU(),
         )
 
-        dummy_input = zeros(self.batch_size, in_channels, 84, 84)
+        # Expected (sample) dummy input = zeros(batch_size, in_channels, 84, 84)
+        h_out = w_out = self._conv2d_size_out(
+            self._conv2d_size_out(self._conv2d_size_out(84, 8, 4), 4, 2),
+            3,
+            1
+        )
+        no_filters_last_conv_layer = 64
+
+        self.in_features = int(h_out * w_out * no_filters_last_conv_layer)
 
         self.fc_stack = nn.Sequential(
-            nn.Linear(self._get_conv2d_output_features(dummy_input), 512),
+            nn.Linear(self.in_features, 512),
             nn.ReLU(),
             nn.Linear(512, self.num_actions),
         )
 
-    def _get_conv2d_output_features(self, dummy_input) -> int:
-        """
-        Get the no of features in the output of the conv-relu-layers-stack which
-        is required to be known for the Linear layer 'in_features' arg.
-        """
-        dummy_conv_output = self.conv_relu_stack(dummy_input)
-        dummy_conv_output = dummy_conv_output.view(self.batch_size, -1)
-        return dummy_conv_output.shape[1]  # 64*7*7
+    # Get the no. of features in the output of the conv-relu-layers-stack which
+    # is required to be known for the Linear layer 'in_features' arg.
+
+    # Following is simplified version. Checkout link below for the detailed one
+    # https://pytorch.org/docs/stable/generated/torch.nn.Conv2d.html
+    @staticmethod
+    def _conv2d_size_out(size, kernel_size, stride):
+        return (size - (kernel_size - 1) - 1) / stride + 1
 
     def forward(self, obs: Tensor) -> Tensor:
         """

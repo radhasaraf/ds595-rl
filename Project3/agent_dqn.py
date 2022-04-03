@@ -76,8 +76,8 @@ class Agent_DQN(Agent):
         self.action_count = self.env.action_space.n
         in_channels = 4  # (R, G, B, Alpha)
 
-        self.Q_net = DQN(in_channels, self.action_count, BATCH_SIZE).to(device)
-        self.target_Q_net = DQN(in_channels, self.action_count, 1).to(device)
+        self.Q_net = DQN(in_channels, self.action_count).to(device)
+        self.target_Q_net = DQN(in_channels, self.action_count).to(device)
         self.target_Q_net.load_state_dict(self.Q_net.state_dict())
         self.optimizer = optim.Adam(self.Q_net.parameters(), lr=LEARNING_RATE)
 
