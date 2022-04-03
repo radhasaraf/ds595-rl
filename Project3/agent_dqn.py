@@ -165,6 +165,7 @@ class Agent_DQN(Agent):
             if epi_num % TARGET_UPDATE_FREQUENCY == 0:
                 self.target_Q_net.load_state_dict(self.Q_net.state_dict())
 
+        torch.save(self.Q_net().state_dict(), "vanilla_dqn_model.pth")
         print("Complete")
 
     def optimize_model(self) -> None:
