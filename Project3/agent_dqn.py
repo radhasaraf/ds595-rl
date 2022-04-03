@@ -20,11 +20,11 @@ np.random.seed(595)
 random.seed(595)
 
 # Checkout recommended values at the end of the original paper
-EPISODES = 500
-LEARNING_RATE = 5e-4  # alpha
+EPISODES = 50000
+LEARNING_RATE = 1.5e-4  # alpha
 GAMMA = 0.99
 BATCH_SIZE = 32
-BUFFER_SIZE = 50000
+BUFFER_SIZE = 10000
 EPSILON = 1.0
 EPSILON_END = 0.025
 FINAL_EXPL_FRAME = 100000
@@ -128,6 +128,7 @@ class Agent_DQN(Agent):
         """
         """
         for epi_num in range(no_of_episodes):  # One episode is one complete game
+            print("Episode", epi_num)
             episode_reward = 0
             curr_state = self.env.reset()
 
@@ -152,7 +153,7 @@ class Agent_DQN(Agent):
                 if done:
                     rew_buffer.append(episode_reward)
                     self.episode_durations.append(step + 1)
-                    self.plot_durations()
+                    # self.plot_durations()
                     break
 
                 # Logging
