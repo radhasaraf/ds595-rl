@@ -206,7 +206,7 @@ class Agent_DQN(Agent):
         loss = criterion(state_action_values, ground_truth_q_values.unsqueeze(1))
 
         # Optimize the model
-        self.optimizer.zero_grad()
+        self.optimizer.zero_grad(set_to_none=True)  # https://pytorch.org/tutorials/recipes/recipes/tuning_guide.html#use-parameter-grad-none-instead-of-model-zero-grad-or-optimizer-zero-grad
         loss.backward()
         for param in self.Q_net.parameters():
             param.grad.data.clamp_(-1, 1)
