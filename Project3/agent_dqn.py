@@ -140,9 +140,10 @@ class Agent_DQN(Agent):
                 # Convert numpy arrays/int to tensors
                 curr_state_t = self.format_state(curr_state)
                 next_state_t = self.format_state(next_state)
+                action_t = torch.tensor([action], device=device)
                 reward_t = torch.tensor([reward], device=device)
 
-                self.buffer.push(curr_state_t, action, reward_t, next_state_t)
+                self.buffer.push(curr_state_t, action_t, reward_t, next_state_t)
 
                 curr_state = next_state
                 episode_reward += reward
