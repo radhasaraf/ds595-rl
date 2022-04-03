@@ -46,5 +46,5 @@ class DQN(nn.Module):
         probabilities
         """
         intermediate_output = self.conv_relu_stack(obs)
-        intermediate_output = intermediate_output.view(self.batch_size, -1)
+        intermediate_output = intermediate_output.view(obs.size()[0], -1)
         return self.fc_stack(intermediate_output)
