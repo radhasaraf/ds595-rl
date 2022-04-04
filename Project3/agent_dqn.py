@@ -196,7 +196,7 @@ class Agent_DQN(Agent):
             device=device,
             dtype=torch.bool
         )
-        next_state_Q_values = torch.zeros(BATCH_SIZE, devide=device)
+        next_state_Q_values = torch.zeros(BATCH_SIZE, device=device)
         next_state_Q_values[non_terminal_mask] = self.target_Q_net(
             non_terminal_next_state_batch
         ).max(dim=1, keepdim=True)[0].detach()
