@@ -199,7 +199,7 @@ class Agent_DQN(Agent):
         next_state_Q_values = torch.zeros(BATCH_SIZE, device=device)
         next_state_Q_values[non_terminal_mask] = self.target_Q_net(
             non_terminal_next_state_batch
-        ).max(dim=1, keepdim=True)[0].detach()
+        ).max(1)[0].detach()
 
         # Compute the ground truth
         ground_truth_q_values = reward_batch + GAMMA*next_state_Q_values
