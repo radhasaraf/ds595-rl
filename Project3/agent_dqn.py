@@ -187,7 +187,8 @@ class Agent_DQN(Agent):
             [s for s in batch.next_state if s is not None]
         )
 
-        state_action_values = self.Q_net(state_batch).gather(1, action_batch)
+        sav_t = self.Q_net(state_batch)
+        state_action_values = sav_t[torch.arange(sav_t.size(0)), action_batch]
 
         # Get state-action values
         non_terminal_mask = torch.tensor(
