@@ -155,9 +155,9 @@ class Agent_DQN(Agent):
                 self.target_Q_net.load_state_dict(self.Q_net.state_dict())
 
             if epi_num % SAVE_MODEL_AFTER == 0:
-                torch.save(self.Q_net().state_dict(), "vanilla_dqn_model.pth")
+                torch.save(self.Q_net.state_dict(), "vanilla_dqn_model.pth")
 
-        torch.save(self.Q_net().state_dict(), "vanilla_dqn_model.pth")
+        torch.save(self.Q_net.state_dict(), "vanilla_dqn_model.pth")
         print("Complete")
         writer.flush()
         writer.close()
