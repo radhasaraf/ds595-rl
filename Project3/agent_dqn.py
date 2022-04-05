@@ -10,10 +10,13 @@ import numpy as np
 import torch
 from matplotlib import pyplot as plt
 from torch import nn, optim
+from torch.utils.tensorboard import SummaryWriter
 
 from agent import Agent
 from dqn_model import DQN
 from environment import Environment
+
+writer = SummaryWriter()
 
 torch.manual_seed(595)
 np.random.seed(595)
@@ -157,17 +160,17 @@ class Agent_DQN(Agent):
                     # self.plot_durations()
                     break
 
-                # Logging
-                if step % 100 == 0:
-                    print()
-                    print('Step:', step)
-                    print('Avg Rew:', np.mean(rew_buffer))
+            # Logging
+            if epi_num % 100 == 0:
+                writer.add_scalar("Mean reward(100) vs Episode", np.mean(rew_buffer), epi_num)
 
             if epi_num % TARGET_UPDATE_FREQUENCY == 0:
                 self.target_Q_net.load_state_dict(self.Q_net.state_dict())
 
         torch.save(self.Q_net().state_dict(), "vanilla_dqn_model.pth")
         print("Complete")
+        writer.flush()
+        writer.close()
 
     def optimize_model(self) -> None:
         """
