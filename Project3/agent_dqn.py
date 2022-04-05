@@ -30,6 +30,7 @@ EPSILON = 1.0
 EPSILON_END = 0.025
 FINAL_EXPL_FRAME = 100000
 TARGET_UPDATE_FREQUENCY = 1000
+SAVE_MODEL_AFTER = 5000
 # decay_per_step = (self.epsilon - epsilon_min) / no_of_steps
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -152,6 +153,9 @@ class Agent_DQN(Agent):
 
             if epi_num % TARGET_UPDATE_FREQUENCY == 0:
                 self.target_Q_net.load_state_dict(self.Q_net.state_dict())
+
+            if epi_num % SAVE_MODEL_AFTER == 0:
+                torch.save(self.Q_net().state_dict(), "vanilla_dqn_model.pth")
 
         torch.save(self.Q_net().state_dict(), "vanilla_dqn_model.pth")
         print("Complete")
