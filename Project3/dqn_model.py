@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from torch import nn, Tensor, zeros
+import torch
+from torch import nn, Tensor
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 class DQN(nn.Module):
@@ -52,6 +55,7 @@ class DQN(nn.Module):
         Passes an observation(state) through the network and generates action
         probabilities
         """
+        obs = obs.to(device)
         intermediate_output = self.conv_relu_stack(obs)
         intermediate_output = intermediate_output.view(obs.size()[0], -1)
         return self.fc_stack(intermediate_output)
