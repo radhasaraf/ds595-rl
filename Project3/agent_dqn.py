@@ -5,10 +5,8 @@ from collections import deque, namedtuple
 from itertools import count
 from typing import List
 
-import matplotlib
 import numpy as np
 import torch
-from matplotlib import pyplot as plt
 from torch import nn, optim
 from torch.utils.tensorboard import SummaryWriter
 
@@ -33,14 +31,6 @@ EPSILON_END = 0.025
 FINAL_EXPL_FRAME = 100000
 TARGET_UPDATE_FREQUENCY = 1000
 # decay_per_step = (self.epsilon - epsilon_min) / no_of_steps
-
-
-# set up matplotlib
-is_ipython = 'inline' in matplotlib.get_backend()
-if is_ipython:
-    from IPython import display
-
-plt.ion()
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 Transition = namedtuple('Transition', ('state', 'action', 'reward', 'next_state'))
@@ -85,8 +75,6 @@ class Agent_DQN(Agent):
         self.optimizer = optim.Adam(self.Q_net.parameters(), lr=LEARNING_RATE)
 
         self.buffer = ReplayBuffer(BUFFER_SIZE)
-
-        self.episode_durations = []
 
         if args.test_dqn:
             #you can load your model here
@@ -156,8 +144,6 @@ class Agent_DQN(Agent):
 
                 if done:
                     rew_buffer.append(episode_reward)
-                    self.episode_durations.append(step + 1)
-                    # self.plot_durations()
                     break
 
             # Logging
@@ -233,22 +219,3 @@ class Agent_DQN(Agent):
 
         # Add a batch dimension (BCHW)
         return torch.from_numpy(state).unsqueeze(0)
-
-    def plot_durations(self) -> None:
-        plt.figure(2)
-        plt.clf()
-        durations_t = torch.tensor(self.episode_durations, dtype=torch.float)
-        plt.title('Training...')
-        plt.xlabel('Episode')
-        plt.ylabel('Duration')
-        plt.plot(durations_t.numpy())
-        # Take 100 episode averages and plot them too
-        if len(durations_t) >= 100:
-            means = durations_t.unfold(0, 100, 1).mean(1).view(-1)
-            means = torch.cat((torch.zeros(99), means))
-            plt.plot(means.numpy())
-
-        plt.pause(0.001)  # pause a bit so that plots are updated
-        if is_ipython:
-            display.clear_output(wait=True)
-            display.display(plt.gcf())
