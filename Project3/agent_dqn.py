@@ -203,10 +203,14 @@ class Agent_DQN(Agent):
 
         # Compute the ground truth
         ground_truth_q_values = reward_batch + GAMMA*next_state_Q_values
+        ground_truth_q_values = torch.reshape(
+            ground_truth_q_values.unsqueeze(1),
+            (1, BATCH_SIZE)
+        )[0]
 
         # Compute Huber loss
         criterion = nn.SmoothL1Loss()
-        loss = criterion(state_action_values, ground_truth_q_values.unsqueeze(1))
+        loss = criterion(state_action_values, ground_truth_q_values)
 
         # Optimize the model
         self.optimizer.zero_grad(set_to_none=True)  # https://pytorch.org/tutorials/recipes/recipes/tuning_guide.html#use-parameter-grad-none-instead-of-model-zero-grad-or-optimizer-zero-grad
