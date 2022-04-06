@@ -48,7 +48,10 @@ class ReplayBuffer(object):
 
     def sample(self, batch_size: int) -> List[Transition]:
         """Randomly sample 'batch_size' number of transitions from buffer"""
-        return random.sample(self.buffer, batch_size)
+        samples = random.sample(self.buffer, batch_size)
+        for elem in samples:
+            self.buffer.remove(elem)
+        return samples
 
     def __len__(self):
         return len(self.buffer)
