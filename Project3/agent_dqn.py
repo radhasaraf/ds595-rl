@@ -79,6 +79,7 @@ class Agent_DQN(Agent):
         self.optimizer = optim.Adam(self.Q_net.parameters(), lr=LEARNING_RATE)
 
         self.buffer = ReplayBuffer(BUFFER_SIZE)
+        self.training_steps = 0
 
         if args.test_dqn:
             #you can load your model here
@@ -151,8 +152,14 @@ class Agent_DQN(Agent):
                     break
 
             # Logging
+            writer.add_scalar("Epsilon vs Step", epsilon, step)
             if epi_num % 100 == 0:
                 writer.add_scalar("Mean reward(100) vs Episode", np.mean(rew_buffer), epi_num)
+                writer.add_scalar(
+                    "Mean reward(100) vs Training steps",
+                    np.mean(rew_buffer),
+                    self.training_steps
+                )
 
             if epi_num % TARGET_UPDATE_FREQUENCY == 0:
                 self.target_Q_net.load_state_dict(self.Q_net.state_dict())
@@ -170,6 +177,8 @@ class Agent_DQN(Agent):
         """
         if len(self.buffer) < BUFFER_SIZE:
             return
+
+        self.training_steps += 1
 
         transitions = self.buffer.sample(BATCH_SIZE)
 
