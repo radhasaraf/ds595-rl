@@ -21,16 +21,17 @@ np.random.seed(595)
 random.seed(595)
 
 # Checkout recommended values at the end of the original paper
-EPISODES = 50000
+EPISODES = 100000
 LEARNING_RATE = 1.5e-4  # alpha
 GAMMA = 0.99
 BATCH_SIZE = 32
 BUFFER_SIZE = 10000
 EPSILON = 1.0
 EPSILON_END = 0.025
-FINAL_EXPL_FRAME = 100000
+FINAL_EXPL_FRAME = 1000000
 TARGET_UPDATE_FREQUENCY = 1000
 SAVE_MODEL_AFTER = 5000
+DECAY_EPSILON_AFTER = 10000
 # decay_per_step = (self.epsilon - epsilon_min) / no_of_steps
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -136,7 +137,10 @@ class Agent_DQN(Agent):
             curr_state = self.env.reset()
 
             for step in count():
-                epsilon = np.interp(step, [0, FINAL_EXPL_FRAME], [EPSILON, EPSILON_END])
+                if epi_num > DECAY_EPSILON_AFTER:
+                    epsilon = np.interp(step, [0, FINAL_EXPL_FRAME], [EPSILON, EPSILON_END])
+                else:
+                    epsilon = EPSILON
                 action = self.get_eps_greedy_action(self.make_action(curr_state), epsilon)
                 next_state, reward, done, _ = self.env.step(action)
 
