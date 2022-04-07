@@ -41,6 +41,18 @@ class DQN(nn.Module):
             nn.Linear(512, self.num_actions),
         )
 
+        self.value_stream = nn.Sequential(
+            nn.Linear(self.in_features, 512),
+            nn.ReLU(),
+            nn.Linear(512, 1)
+        )
+
+        self.advantage_stream = nn.Sequential(
+            nn.Linear(self.in_features, 512),
+            nn.ReLU(),
+            nn.Linear(512, self.num_actions)
+        )
+
     # Get the no. of features in the output of the conv-relu-layers-stack which
     # is required to be known for the Linear layer 'in_features' arg.
 
@@ -50,12 +62,22 @@ class DQN(nn.Module):
     def _conv2d_size_out(size, kernel_size, stride):
         return (size - (kernel_size - 1) - 1) / stride + 1
 
+    # def forward(self, obs: Tensor) -> Tensor:
+    #     """
+    #     Passes an observation(state) through the network and generates action
+    #     probabilities
+    #     """
+    #     obs = obs.to(device)
+    #     intermediate_output = self.conv_relu_stack(obs)
+    #     intermediate_output = intermediate_output.view(obs.size()[0], -1)
+    #     return self.fc_stack(intermediate_output)
+
     def forward(self, obs: Tensor) -> Tensor:
-        """
-        Passes an observation(state) through the network and generates action
-        probabilities
-        """
         obs = obs.to(device)
         intermediate_output = self.conv_relu_stack(obs)
-        intermediate_output = intermediate_output.view(obs.size()[0], -1)
-        return self.fc_stack(intermediate_output)
+        intermediate_output = intermediate_output.view(obs.size(0), -1)
+        values = self.value_stream(intermediate_output)
+        advantages = self.advantage_stream(intermediate_output)
+        qvals = values + (advantages - advantages.mean())
+
+        return qvals
